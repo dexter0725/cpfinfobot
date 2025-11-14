@@ -295,18 +295,20 @@ def main() -> None:
     st.sidebar.markdown("### Go to")
     nav_options = ["CPF Bot", "About", "Methodology"]
     current_index = nav_options.index(st.session_state.active_page) if st.session_state.active_page in nav_options else 0
-    selected_page = st.sidebar.radio("", nav_options, index=current_index)
+    selected_page = st.sidebar.radio("", nav_options, index=current_index, key="nav_radio")
 
-    if st.session_state.active_page != "Admin":
+    if st.session_state.active_page != "Admin" and selected_page != st.session_state.active_page:
         st.session_state.active_page = selected_page
         if st.session_state.admin_authenticated:
             st.session_state.admin_authenticated = False
+        st.rerun()
 
     st.sidebar.markdown("\n\n")
     st.sidebar.markdown("---")
     st.sidebar.markdown("### Admin Tools")
     if st.sidebar.button("Open Admin Console", type="primary", use_container_width=True):
         st.session_state.active_page = "Admin"
+        st.rerun()
 
     active_page = st.session_state.active_page
     if active_page == "Admin":
