@@ -261,15 +261,21 @@ def page_bot() -> None:
     if not pipeline:
         return
     _inject_styles()
-    user_tab, admin_tab, official_tab = st.tabs(["Public User", "Admin", "Official CPF"])
-    with user_tab:
-        _render_user_panel(pipeline)
-    with admin_tab:
-        _render_admin_panel(pipeline)
-    with official_tab:
-        st.header("Visit Official CPF Resources")
-        st.write("For the most up-to-date information, visit the official CPF website.")
-        st.link_button("Open cpf.gov.sg", "https://www.cpf.gov.sg")
+    _render_user_panel(pipeline)
+
+
+def page_admin() -> None:
+    pipeline = _init_pipeline()
+    if not pipeline:
+        return
+    _inject_styles()
+    _render_admin_panel(pipeline)
+
+
+def page_official() -> None:
+    st.header("Visit Official CPF Resources")
+    st.write("For the most up-to-date information, visit the official CPF website.")
+    st.link_button("Open cpf.gov.sg", "https://www.cpf.gov.sg")
 
 
 def main() -> None:
@@ -277,14 +283,19 @@ def main() -> None:
     if not check_password():
         st.stop()
     st.sidebar.title("CPF Bot Navigation")
-    page = st.sidebar.radio("Go to", ["CPF Verification", "About", "Methodology"], index=0)
+    st.sidebar.markdown("### Go to")
+    page = st.sidebar.radio("", ["CPF Verification", "Admin", "About", "Methodology", "Official CPF"], index=0)
 
     if page == "CPF Verification":
         page_bot()
+    elif page == "Admin":
+        page_admin()
     elif page == "About":
         page_about()
-    else:
+    elif page == "Methodology":
         page_methodology()
+    else:
+        page_official()
 
 
 if __name__ == "__main__":
