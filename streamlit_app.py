@@ -28,7 +28,7 @@ else:
 
 ENV_PATH = PACKAGE_ROOT / ".env"
 ROOT_ENV_PATH = PROJECT_ROOT / ".env"
-DEFAULT_TOP_K = 4
+DEFAULT_TOP_K = 6
 
 load_dotenv(ENV_PATH, override=False)
 load_dotenv(ROOT_ENV_PATH, override=True)
@@ -173,11 +173,7 @@ def _render_user_panel(pipeline: RAGPipeline) -> None:
             height=150,
             key="user_question",
         )
-        col1, col2 = st.columns([2, 1])
-        with col1:
-            top_k = st.slider("Evidence chunks", min_value=2, max_value=8, value=DEFAULT_TOP_K)
-        with col2:
-            ask = st.button("Ask CPF Bot", type="primary", use_container_width=True)
+        ask = st.button("Ask CPF Bot", type="primary", use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
     summarize = st.checkbox("Add evidence summary", value=False)
     export_label = st.text_input("Optional filename for export", value="cpf_bot_response.txt")
@@ -188,7 +184,7 @@ def _render_user_panel(pipeline: RAGPipeline) -> None:
         else:
             try:
                 with st.spinner("Generating grounded answer..."):
-                    response = pipeline.query(question, top_k=top_k)
+                    response = pipeline.query(question, top_k=DEFAULT_TOP_K)
             except ValueError:
                 st.error(
                     "Knowledge base is empty. Run `python -m cpf_bot.rebuild_vectorstore` in your terminal (after activating the virtualenv) to regenerate embeddings."
@@ -198,7 +194,7 @@ def _render_user_panel(pipeline: RAGPipeline) -> None:
             st.markdown(f"<div class='cpf-answer'>{response.answer}</div>", unsafe_allow_html=True)
             if summarize:
                 with st.spinner("Summarizing evidence..."):
-                    summary = pipeline.summarize_sources(question, top_k=top_k)
+                    summary = pipeline.summarize_sources(question, top_k=DEFAULT_TOP_K)
                 st.markdown("### Evidence Summary")
                 st.markdown(f"<div class='cpf-answer'>{summary}</div>", unsafe_allow_html=True)
             st.markdown("### Sources")
