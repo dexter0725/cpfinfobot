@@ -338,7 +338,6 @@ def main() -> None:
         else:
             for file in files:
                 st.write("•", file.name)
-        st.rerun()
 
     active_page = st.session_state.active_page
     if active_page == "Admin":
