@@ -51,6 +51,11 @@ def _inject_styles() -> None:
             .cpf-card button {
                 border-radius: 999px !important;
             }
+            .cpf-answer {
+                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                font-size: 1rem;
+                line-height: 1.6;
+            }
         </style>
         """,
         unsafe_allow_html=True,
@@ -190,12 +195,12 @@ def _render_user_panel(pipeline: RAGPipeline) -> None:
                 )
                 return
             st.markdown("### Answer")
-            st.write(response.answer)
+            st.markdown(f"<div class='cpf-answer'>{response.answer}</div>", unsafe_allow_html=True)
             if summarize:
                 with st.spinner("Summarizing evidence..."):
                     summary = pipeline.summarize_sources(question, top_k=top_k)
                 st.markdown("### Evidence Summary")
-                st.write(summary)
+                st.markdown(f"<div class='cpf-answer'>{summary}</div>", unsafe_allow_html=True)
             st.markdown("### Sources")
             for citation, doc_text in zip(response.citations, response.source_documents):
                 with st.expander(citation):
