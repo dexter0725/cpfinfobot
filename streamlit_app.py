@@ -284,8 +284,8 @@ def page_bot() -> None:
     if not pipeline:
         return
     _inject_styles()
-    user_tab, official_tab = st.tabs(["Public User", "Official CPF"])
-    with user_tab:
+    bot_tab, official_tab = st.tabs(["CPF Bot", "Official CPF"])
+    with bot_tab:
         _render_user_panel(pipeline)
     with official_tab:
         st.header("Visit Official CPF Resources")
