@@ -7,7 +7,10 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 from langchain_openai import ChatOpenAI
-from langchain.schema import AIMessage, HumanMessage, SystemMessage
+try:
+    from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+except ImportError:  # pragma: no cover - compatibility for langchain < 0.2
+    from langchain.schema import AIMessage, HumanMessage, SystemMessage
 
 PACKAGE_ROOT = Path(__file__).resolve().parent
 if __package__ in (None, ""):
