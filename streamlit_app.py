@@ -190,6 +190,8 @@ def _render_user_panel(pipeline: RAGPipeline) -> None:
                     "Knowledge base is empty. Run `python -m cpf_bot.rebuild_vectorstore` in your terminal (after activating the virtualenv) to regenerate embeddings."
                 )
                 return
+            st.markdown("### Answer")
+            st.markdown(f"<div class='cpf-answer'>{response.answer}</div>", unsafe_allow_html=True)
             download_text = f"Question: {question}\n\nAnswer:\n{response.answer}\n\nSources: {', '.join(response.citations)}"
             st.download_button(
                 "Download response",
