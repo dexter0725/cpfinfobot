@@ -261,7 +261,13 @@ def page_bot() -> None:
     if not pipeline:
         return
     _inject_styles()
-    _render_user_panel(pipeline)
+    user_tab, official_tab = st.tabs(["Public User", "Official CPF"])
+    with user_tab:
+        _render_user_panel(pipeline)
+    with official_tab:
+        st.header("Visit Official CPF Resources")
+        st.write("For the most up-to-date information, visit the official CPF website.")
+        st.link_button("Open cpf.gov.sg", "https://www.cpf.gov.sg")
 
 
 def page_admin() -> None:
@@ -272,30 +278,28 @@ def page_admin() -> None:
     _render_admin_panel(pipeline)
 
 
-def page_official() -> None:
-    st.header("Visit Official CPF Resources")
-    st.write("For the most up-to-date information, visit the official CPF website.")
-    st.link_button("Open cpf.gov.sg", "https://www.cpf.gov.sg")
-
-
 def main() -> None:
     st.set_page_config(page_title="CPF Board Info Verification Bot", page_icon="📘", layout="wide")
     if not check_password():
         st.stop()
     st.sidebar.title("CPF Bot Navigation")
     st.sidebar.markdown("### Go to")
-    page = st.sidebar.radio("", ["CPF Verification", "Admin", "About", "Methodology", "Official CPF"], index=0)
+    page = st.sidebar.radio("", ["CPF Bot", "About", "Methodology"], index=0)
 
-    if page == "CPF Verification":
+    if page == "CPF Bot":
         page_bot()
-    elif page == "Admin":
-        page_admin()
     elif page == "About":
         page_about()
     elif page == "Methodology":
         page_methodology()
     else:
-        page_official()
+        page_bot()
+
+    st.sidebar.markdown("\n\n")
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### Admin Tools")
+    if st.sidebar.button("Open Admin Console", type="primary", use_container_width=True):
+        page_admin()
 
 
 if __name__ == "__main__":
