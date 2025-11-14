@@ -227,11 +227,14 @@ def _render_admin_panel(pipeline: RAGPipeline) -> None:
         return
     if not st.session_state.get("admin_authenticated"):
         st.info("Enter the admin password to manage documents.")
-        password = st.text_input("Admin password", type="password", key="admin_password_input")
-        if st.button("Unlock admin tools", key="unlock_admin"):
+        with st.form("admin_login_form"):
+            password = st.text_input("Admin password", type="password", key="admin_password_input")
+            submitted = st.form_submit_button("Unlock admin tools")
+        if submitted:
             if verify_admin_password(password or ""):
                 st.session_state.admin_authenticated = True
                 st.success("Admin tools unlocked.")
+                st.experimental_rerun()
             else:
                 st.error("Incorrect admin password.")
         return
@@ -240,7 +243,7 @@ def _render_admin_panel(pipeline: RAGPipeline) -> None:
         st.session_state.admin_authenticated = False
         st.session_state.pop("admin_password_input", None)
         st.session_state.active_page = "CPF Bot"
-        st.stop()
+        st.experimental_rerun()
     uploaded = st.file_uploader("Upload CPF FAQ (PDF/Markdown)", type=["pdf", "md", "txt"])
     if uploaded:
         save_path = _save_uploaded_file(uploaded)
@@ -285,6 +288,8 @@ def main() -> None:
         st.stop()
     if "active_page" not in st.session_state:
         st.session_state.active_page = "CPF Bot"
+    if "admin_authenticated" not in st.session_state:
+        st.session_state.admin_authenticated = False
 
     st.sidebar.title("CPF Bot Navigation")
     st.sidebar.markdown("### Go to")
@@ -294,6 +299,8 @@ def main() -> None:
 
     if st.session_state.active_page != "Admin":
         st.session_state.active_page = selected_page
+        if st.session_state.admin_authenticated:
+            st.session_state.admin_authenticated = False
 
     st.sidebar.markdown("\n\n")
     st.sidebar.markdown("---")
