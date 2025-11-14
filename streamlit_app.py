@@ -167,14 +167,13 @@ def page_methodology() -> None:
 def _render_user_panel(pipeline: RAGPipeline) -> None:
     st.subheader("Ask CPF Bot")
     st.caption("Verify any CPF-related statement in seconds. Responses are grounded in official CPF FAQs.")
-    with st.expander("Important notice", expanded=False):
+    with st.expander("Paste your CPF question or claim", expanded=True):
         st.warning(
             """IMPORTANT NOTICE: This web application is a prototype developed for educational purposes only.
             The information provided here is NOT intended for real-world usage and should not be relied upon for
             financial, legal, or healthcare decisions. The LLM may generate inaccurate information; you assume full
             responsibility for any use of the output. Always consult qualified professionals for accurate, personalized advice."""
         )
-    with st.container():
         st.markdown('<div class="cpf-card">', unsafe_allow_html=True)
         question = st.text_area(
             "Paste your CPF question or claim",
