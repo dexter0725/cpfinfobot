@@ -54,7 +54,10 @@ class RAGPipeline:
 
     def _get_documents(self, question: str, top_k: int):
         retriever = self.vector_store.as_retriever(search_kwargs={"k": top_k})
-        return retriever.get_relevant_documents(question)
+        if hasattr(retriever, "get_relevant_documents"):
+            return retriever.get_relevant_documents(question)
+        # langchain-core retrievers expose .invoke(prompt)
+        return retriever.invoke(question)
 
     def query(self, question: str, top_k: int = 4) -> RAGResponse:
         documents = self._get_documents(question, top_k)
