@@ -182,11 +182,11 @@ def _render_user_panel(pipeline: RAGPipeline) -> None:
             responsibility for any use of the output. Always consult qualified professionals for accurate, personalized advice."""
         )
     st.markdown('<div class="cpf-card">', unsafe_allow_html=True)
-    st.markdown("<p class='cpf-card-label'><strong>Paste your CPF question or claim</strong></p>", unsafe_allow_html=True)
+    st.markdown("<p class='cpf-card-label'><strong>Paste your CPF question or claim:</strong></p>", unsafe_allow_html=True)
     question = st.text_area(
         "Paste your CPF question or claim",
         placeholder="E.g. I heard I can withdraw all of my OA savings at 55 if I sell my flat. Is this true?",
-        height=150,
+        height=220,
         key="user_question",
         label_visibility="collapsed",
     )
