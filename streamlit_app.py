@@ -65,6 +65,13 @@ def _inject_styles() -> None:
                 font-size: 1rem;
                 line-height: 1.6;
             }
+            .cpf-card-label {
+                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                font-size: 1.05rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+                color: #0f172a;
+            }
         </style>
         """,
         unsafe_allow_html=True,
@@ -167,22 +174,24 @@ def page_methodology() -> None:
 def _render_user_panel(pipeline: RAGPipeline) -> None:
     st.subheader("Ask CPF Bot")
     st.caption("Verify any CPF-related statement in seconds. Responses are grounded in official CPF FAQs.")
-    with st.expander("Paste your CPF question or claim", expanded=True):
+    with st.expander("Important notice", expanded=False):
         st.warning(
             """IMPORTANT NOTICE: This web application is a prototype developed for educational purposes only.
             The information provided here is NOT intended for real-world usage and should not be relied upon for
             financial, legal, or healthcare decisions. The LLM may generate inaccurate information; you assume full
             responsibility for any use of the output. Always consult qualified professionals for accurate, personalized advice."""
         )
-        st.markdown('<div class="cpf-card">', unsafe_allow_html=True)
-        question = st.text_area(
-            "Paste your CPF question or claim",
-            placeholder="E.g. I heard I can withdraw all of my OA savings at 55 if I sell my flat. Is this true?",
-            height=150,
-            key="user_question",
-        )
-        ask = st.button("Ask CPF Bot", type="primary", use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('<div class="cpf-card">', unsafe_allow_html=True)
+    st.markdown("<p class='cpf-card-label'><strong>Paste your CPF question or claim</strong></p>", unsafe_allow_html=True)
+    question = st.text_area(
+        "Paste your CPF question or claim",
+        placeholder="E.g. I heard I can withdraw all of my OA savings at 55 if I sell my flat. Is this true?",
+        height=150,
+        key="user_question",
+        label_visibility="collapsed",
+    )
+    ask = st.button("Ask CPF Bot", type="primary", use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     summarize = st.checkbox("Add evidence summary", value=False)
     export_label = st.text_input("Optional filename for export", value="cpf_bot_response.txt")
 
