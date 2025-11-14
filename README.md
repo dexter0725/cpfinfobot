@@ -8,6 +8,7 @@ A Streamlit-based Retrieval-Augmented Generation (RAG) prototype that helps memb
 - **RAG-backed answers** – GPT-4o mini answers are constrained to retrieved CPF sources served from a Chroma vector store.
 - **Optional evidence tools** – Users can add an evidence summary and export the response plus citations as a text file.
 - **About & Methodology pages** – Provide context, impact, and architecture notes for stakeholders.
+- **Safety guardrails** – Built-in prompt-injection detection and instruction-following policies prevent the bot from executing malicious directives.
 
 ## Project Structure
 ```
@@ -55,6 +56,7 @@ cpf_bot/
 - **Admin tab (password protected)**: Upload CPF PDFs/markdown files, then press “Rebuild knowledge base” to re-embed them. The document table confirms what’s indexed.
 - **Public user tab**: Paste a claim, choose the number of evidence chunks, optionally add an evidence summary, and download the response for record-keeping.
 - **CLI refresh**: You can still drop files into `cpf_bot/data/uploads/` and run `python -m cpf_bot.rebuild_vectorstore` locally before deploying.
+- **Security guardrails**: The user interface screens for prompt injection phrases and long inputs, while the RAG system prompt instructs the LLM to refuse attempts to override its behaviour.
 
 ## Deployment
 Deploy directly to [Streamlit Community Cloud](https://streamlit.io/cloud):

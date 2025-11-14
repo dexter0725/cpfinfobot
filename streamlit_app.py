@@ -29,6 +29,15 @@ else:
 ENV_PATH = PACKAGE_ROOT / ".env"
 ROOT_ENV_PATH = PROJECT_ROOT / ".env"
 DEFAULT_TOP_K = 6
+MAX_QUESTION_CHARS = 1500
+INJECTION_PATTERNS = [
+    "ignore previous instructions",
+    "disregard previous",
+    "system prompt",
+    "you are now",
+    "act as",
+    "forget earlier",
+]
 
 load_dotenv(ENV_PATH, override=False)
 load_dotenv(ROOT_ENV_PATH, override=True)
@@ -179,12 +188,23 @@ def _render_user_panel(pipeline: RAGPipeline) -> None:
     export_label = st.text_input("Optional filename for export", value="cpf_bot_response.txt")
 
     if ask:
-        if not question.strip():
+        cleaned_question = question.strip()
+        if not cleaned_question:
             st.warning("Enter a question or claim to verify.")
         else:
+            lower_q = cleaned_question.lower()
+            if len(cleaned_question) > MAX_QUESTION_CHARS:
+                st.error("Your question is too long. Please shorten it below 1,500 characters.")
+                return
+            if any(pattern in lower_q for pattern in INJECTION_PATTERNS):
+                st.error(
+                    "The submitted question contains phrases that look like prompt-injection attempts."
+                    " Please rephrase it without instructions to override the bot's behaviour."
+                )
+                return
             try:
                 with st.spinner("Generating grounded answer..."):
-                    response = pipeline.query(question, top_k=DEFAULT_TOP_K)
+                    response = pipeline.query(cleaned_question, top_k=DEFAULT_TOP_K)
             except ValueError:
                 st.error(
                     "Knowledge base is empty. Run `python -m cpf_bot.rebuild_vectorstore` in your terminal (after activating the virtualenv) to regenerate embeddings."
@@ -192,7 +212,7 @@ def _render_user_panel(pipeline: RAGPipeline) -> None:
                 return
             st.markdown("### Answer")
             st.markdown(f"<div class='cpf-answer'>{response.answer}</div>", unsafe_allow_html=True)
-            download_text = f"Question: {question}\n\nAnswer:\n{response.answer}\n\nSources: {', '.join(response.citations)}"
+            download_text = f"Question: {cleaned_question}\n\nAnswer:\n{response.answer}\n\nSources: {', '.join(response.citations)}"
             st.download_button(
                 "Download response",
                 data=download_text,
@@ -202,7 +222,7 @@ def _render_user_panel(pipeline: RAGPipeline) -> None:
             )
             if summarize:
                 with st.spinner("Summarizing evidence..."):
-                    summary = pipeline.summarize_sources(question, top_k=DEFAULT_TOP_K)
+                    summary = pipeline.summarize_sources(cleaned_question, top_k=DEFAULT_TOP_K)
                 st.markdown("### Evidence Summary")
                 st.markdown(f"<div class='cpf-answer'>{summary}</div>", unsafe_allow_html=True)
             st.markdown("### Sources")
