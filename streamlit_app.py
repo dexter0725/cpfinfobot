@@ -231,21 +231,12 @@ def _render_user_panel(pipeline: RAGPipeline) -> None:
             if summarize:
                 with st.spinner("Summarizing evidence..."):
                     summary = pipeline.summarize_sources(cleaned_question, top_k=DEFAULT_TOP_K)
-                st.markdown("### Evidence Summary")
+                st.markdown("### EVIDENCE SUMMARY")
                 st.markdown(f"<div class='cpf-answer'>{summary}</div>", unsafe_allow_html=True)
             st.markdown("### Sources")
             for citation, doc_text in zip(response.citations, response.source_documents):
                 with st.expander(citation):
                     st.write(doc_text)
-
-    with st.expander("Knowledge base files"):
-        files = ingest.list_existing_documents()
-        if not files:
-            st.write("No documents found. Add markdown/PDF files under `cpf_bot/data/` and rerun the rebuild script.")
-        else:
-            for file in files:
-                st.write("•", file.name)
-
 
 def _render_admin_panel(pipeline: RAGPipeline) -> None:
     st.subheader("Admin – Document Management")
@@ -339,6 +330,14 @@ def main() -> None:
     st.sidebar.markdown("### Admin Tools")
     if st.sidebar.button("Open Admin Console", type="primary", use_container_width=True):
         st.session_state.active_page = "Admin"
+        st.rerun()
+    with st.sidebar.expander("Knowledge base files"):
+        files = ingest.list_existing_documents()
+        if not files:
+            st.write("No documents found. Add markdown/PDF files and rebuild.")
+        else:
+            for file in files:
+                st.write("•", file.name)
         st.rerun()
 
     active_page = st.session_state.active_page
