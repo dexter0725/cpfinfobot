@@ -190,8 +190,14 @@ def _render_user_panel(pipeline: RAGPipeline) -> None:
                     "Knowledge base is empty. Run `python -m cpf_bot.rebuild_vectorstore` in your terminal (after activating the virtualenv) to regenerate embeddings."
                 )
                 return
-            st.markdown("### Answer")
-            st.markdown(f"<div class='cpf-answer'>{response.answer}</div>", unsafe_allow_html=True)
+            download_text = f"Question: {question}\n\nAnswer:\n{response.answer}\n\nSources: {', '.join(response.citations)}"
+            st.download_button(
+                "Download response",
+                data=download_text,
+                file_name=export_label.strip() or "cpf_bot_response.txt",
+                mime="text/plain",
+                use_container_width=True,
+            )
             if summarize:
                 with st.spinner("Summarizing evidence..."):
                     summary = pipeline.summarize_sources(question, top_k=DEFAULT_TOP_K)
@@ -201,14 +207,6 @@ def _render_user_panel(pipeline: RAGPipeline) -> None:
             for citation, doc_text in zip(response.citations, response.source_documents):
                 with st.expander(citation):
                     st.write(doc_text)
-            download_text = f"Question: {question}\n\nAnswer:\n{response.answer}\n\nSources: {', '.join(response.citations)}"
-            st.download_button(
-                "Download response",
-                data=download_text,
-                file_name=export_label.strip() or "cpf_bot_response.txt",
-                mime="text/plain",
-                use_container_width=True,
-            )
 
     with st.expander("Knowledge base files"):
         files = ingest.list_existing_documents()
@@ -261,11 +259,15 @@ def page_bot() -> None:
     if not pipeline:
         return
     _inject_styles()
-    user_tab, admin_tab = st.tabs(["Public User", "Admin"])
+    user_tab, admin_tab, official_tab = st.tabs(["Public User", "Admin", "Official CPF"])
     with user_tab:
         _render_user_panel(pipeline)
     with admin_tab:
         _render_admin_panel(pipeline)
+    with official_tab:
+        st.header("Visit Official CPF Resources")
+        st.write("For the most up-to-date information, visit the official CPF website.")
+        st.link_button("Open cpf.gov.sg", "https://www.cpf.gov.sg")
 
 
 def main() -> None:
