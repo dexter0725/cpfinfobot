@@ -284,7 +284,7 @@ def page_bot() -> None:
     if not pipeline:
         return
     _inject_styles()
-    bot_tab, official_tab = st.tabs(["CPF Bot", "Official CPF"])
+    bot_tab, official_tab = st.tabs(["CPF Bot", "Official CPF Website"])
     with bot_tab:
         _render_user_panel(pipeline)
     with official_tab:
