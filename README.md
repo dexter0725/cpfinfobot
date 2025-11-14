@@ -3,11 +3,11 @@
 A Streamlit-based Retrieval-Augmented Generation (RAG) prototype that helps members of the public verify CPF-related claims by grounding LLM responses in official CPF documents.
 
 ## Features
-- **Single-click Q&A** – Minimalist Streamlit UI focused on asking CPF questions and reading grounded answers.
-- **Curated corpus** – Static CPF FAQ summaries covering retirement, housing, MediSave, contributions, and education stored under `cpf_bot/data/sample_docs/`.
-- **RAG-backed answers** – GPT-4o mini answers are constrained to retrieved CPF sources with citations (Chroma vector store).
-- **Streamlined Q&A** – Public users only see the essentials: ask a question and read the grounded answer with cited snippets.
-- **About & Methodology pages** – Explain the problem context and solution approach.
+- **Role-aware UI** – Public users verify claims while admins upload CPF documents and rebuild the vector store.
+- **Document management** – Upload PDFs/markdown, view the indexed corpus, and trigger a rebuild directly from the Admin tab.
+- **RAG-backed answers** – GPT-4o mini answers are constrained to retrieved CPF sources served from a Chroma vector store.
+- **Optional evidence tools** – Users can add an evidence summary and export the response plus citations as a text file.
+- **About & Methodology pages** – Provide context, impact, and architecture notes for stakeholders.
 
 ## Project Structure
 ```
@@ -52,8 +52,9 @@ cpf_bot/
    ```
 
 ## Usage Workflow
-- **Maintain corpus**: Drop new CPF references into `cpf_bot/data/uploads/` and rerun `python -m cpf_bot.rebuild_vectorstore` when you want to refresh embeddings.
-- **Public user**: Paste any CPF-related claim and review the grounded answer plus cited snippets.
+- **Admin tab (password protected)**: Upload CPF PDFs/markdown files, then press “Rebuild knowledge base” to re-embed them. The document table confirms what’s indexed.
+- **Public user tab**: Paste a claim, choose the number of evidence chunks, optionally add an evidence summary, and download the response for record-keeping.
+- **CLI refresh**: You can still drop files into `cpf_bot/data/uploads/` and run `python -m cpf_bot.rebuild_vectorstore` locally before deploying.
 
 ## Deployment
 Deploy directly to [Streamlit Community Cloud](https://streamlit.io/cloud):
@@ -67,7 +68,7 @@ Deploy directly to [Streamlit Community Cloud](https://streamlit.io/cloud):
 - **LLM**: `gpt-4o-mini` via `ChatOpenAI` for grounded answers and summaries.
 
 
-> The knowledge base ships with curated CPF FAQ summaries. Update them manually and rerun the rebuild script whenever new official information is available.
+> The knowledge base ships with the CPF Board’s 2025 information sheet. Update the corpus via the Admin tab or rebuild script whenever new official information is available.
 
 ## Sample Data
 Three CPF knowledge snippets are preloaded under `data/sample_docs/` covering retirement payouts, housing usage, and contribution rules. Add more official CPF FAQs to improve coverage.

@@ -73,6 +73,34 @@ def _init_pipeline() -> Optional[RAGPipeline]:
     return st.session_state.pipeline
 
 
+def _save_uploaded_file(uploaded_file) -> Optional[Path]:
+    if uploaded_file is None:
+        return None
+    ingest.ensure_directories()
+    save_path = ingest.UPLOADS_DIR / uploaded_file.name
+    with open(save_path, "wb") as f:
+        f.write(uploaded_file.read())
+    return save_path
+
+
+def _render_document_table() -> None:
+    files = ingest.list_existing_documents()
+    if not files:
+        st.info("No documents are indexed yet. Upload a CPF reference to get started.")
+        return
+    data = []
+    for file in files:
+        stats = file.stat()
+        data.append(
+            {
+                "File": file.name,
+                "Folder": file.parent.name,
+                "Size (KB)": round(stats.st_size / 1024, 2),
+            }
+        )
+    st.dataframe(data, use_container_width=True, hide_index=True)
+
+
 def page_about() -> None:
     st.header("CPF Board Info Verification Bot")
     st.write(
@@ -136,8 +164,14 @@ def _render_user_panel(pipeline: RAGPipeline) -> None:
             height=150,
             key="user_question",
         )
-        ask = st.button("Ask CPF Bot", type="primary", use_container_width=True)
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            top_k = st.slider("Evidence chunks", min_value=2, max_value=8, value=DEFAULT_TOP_K)
+        with col2:
+            ask = st.button("Ask CPF Bot", type="primary", use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
+    summarize = st.checkbox("Add evidence summary", value=False)
+    export_label = st.text_input("Optional filename for export", value="cpf_bot_response.txt")
 
     if ask:
         if not question.strip():
@@ -145,7 +179,7 @@ def _render_user_panel(pipeline: RAGPipeline) -> None:
         else:
             try:
                 with st.spinner("Generating grounded answer..."):
-                    response = pipeline.query(question, top_k=DEFAULT_TOP_K)
+                    response = pipeline.query(question, top_k=top_k)
             except ValueError:
                 st.error(
                     "Knowledge base is empty. Run `python -m cpf_bot.rebuild_vectorstore` in your terminal (after activating the virtualenv) to regenerate embeddings."
@@ -153,10 +187,23 @@ def _render_user_panel(pipeline: RAGPipeline) -> None:
                 return
             st.markdown("### Answer")
             st.write(response.answer)
+            if summarize:
+                with st.spinner("Summarizing evidence..."):
+                    summary = pipeline.summarize_sources(question, top_k=top_k)
+                st.markdown("### Evidence Summary")
+                st.write(summary)
             st.markdown("### Sources")
             for citation, doc_text in zip(response.citations, response.source_documents):
                 with st.expander(citation):
                     st.write(doc_text)
+            download_text = f"Question: {question}\n\nAnswer:\n{response.answer}\n\nSources: {', '.join(response.citations)}"
+            st.download_button(
+                "Download response",
+                data=download_text,
+                file_name=export_label.strip() or "cpf_bot_response.txt",
+                mime="text/plain",
+                use_container_width=True,
+            )
 
     with st.expander("Knowledge base files"):
         files = ingest.list_existing_documents()
@@ -167,12 +214,35 @@ def _render_user_panel(pipeline: RAGPipeline) -> None:
                 st.write("•", file.name)
 
 
+def _render_admin_panel(pipeline: RAGPipeline) -> None:
+    st.subheader("Admin – Document Management")
+    st.caption("Upload new CPF references or rebuild the knowledge base. Changes affect all users.")
+    uploaded = st.file_uploader("Upload CPF FAQ (PDF/Markdown)", type=["pdf", "md", "txt"])
+    if uploaded:
+        save_path = _save_uploaded_file(uploaded)
+        if save_path:
+            st.success(f"Saved {save_path.name} to the uploads folder. Click rebuild to index it.")
+    if st.button("Rebuild knowledge base", type="secondary"):
+        try:
+            with st.spinner("Embedding documents via OpenAI..."):
+                pipeline.refresh_store()
+            st.success("Vector store refreshed.")
+        except Exception as exc:  # pragma: no cover - handled interactively
+            st.error(f"Failed to rebuild vector store: {exc}")
+    st.markdown("### Indexed documents")
+    _render_document_table()
+
+
 def page_bot() -> None:
     pipeline = _init_pipeline()
     if not pipeline:
         return
     _inject_styles()
-    _render_user_panel(pipeline)
+    user_tab, admin_tab = st.tabs(["Public User", "Admin"])
+    with user_tab:
+        _render_user_panel(pipeline)
+    with admin_tab:
+        _render_admin_panel(pipeline)
 
 
 def main() -> None:
