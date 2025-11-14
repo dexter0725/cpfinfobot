@@ -239,6 +239,7 @@ def _render_admin_panel(pipeline: RAGPipeline) -> None:
     if st.button("Log out", key="admin_logout"):
         st.session_state.admin_authenticated = False
         st.session_state.pop("admin_password_input", None)
+        st.session_state.active_page = "CPF Bot"
         st.stop()
     uploaded = st.file_uploader("Upload CPF FAQ (PDF/Markdown)", type=["pdf", "md", "txt"])
     if uploaded:
@@ -282,24 +283,35 @@ def main() -> None:
     st.set_page_config(page_title="CPF Board Info Verification Bot", page_icon="📘", layout="wide")
     if not check_password():
         st.stop()
+    if "active_page" not in st.session_state:
+        st.session_state.active_page = "CPF Bot"
+
     st.sidebar.title("CPF Bot Navigation")
     st.sidebar.markdown("### Go to")
-    page = st.sidebar.radio("", ["CPF Bot", "About", "Methodology"], index=0)
+    nav_options = ["CPF Bot", "About", "Methodology"]
+    current_index = nav_options.index(st.session_state.active_page) if st.session_state.active_page in nav_options else 0
+    selected_page = st.sidebar.radio("", nav_options, index=current_index)
 
-    if page == "CPF Bot":
-        page_bot()
-    elif page == "About":
-        page_about()
-    elif page == "Methodology":
-        page_methodology()
-    else:
-        page_bot()
+    if st.session_state.active_page != "Admin":
+        st.session_state.active_page = selected_page
 
     st.sidebar.markdown("\n\n")
     st.sidebar.markdown("---")
     st.sidebar.markdown("### Admin Tools")
     if st.sidebar.button("Open Admin Console", type="primary", use_container_width=True):
+        st.session_state.active_page = "Admin"
+
+    active_page = st.session_state.active_page
+    if active_page == "Admin":
         page_admin()
+    elif active_page == "CPF Bot":
+        page_bot()
+    elif active_page == "About":
+        page_about()
+    elif active_page == "Methodology":
+        page_methodology()
+    else:
+        page_bot()
 
 
 if __name__ == "__main__":
