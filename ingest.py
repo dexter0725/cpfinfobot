@@ -7,7 +7,10 @@ from typing import Iterable, List
 
 import shutil
 from langchain_community.vectorstores import Chroma
-from langchain.docstore.document import Document
+try:
+    from langchain_core.documents import Document  # langchain 0.2+
+except ImportError:  # pragma: no cover - fallback for older versions
+    from langchain.docstore.document import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from pypdf import PdfReader
