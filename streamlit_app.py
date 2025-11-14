@@ -234,7 +234,7 @@ def _render_admin_panel(pipeline: RAGPipeline) -> None:
             if verify_admin_password(password or ""):
                 st.session_state.admin_authenticated = True
                 st.success("Admin tools unlocked.")
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.error("Incorrect admin password.")
         return
@@ -243,7 +243,7 @@ def _render_admin_panel(pipeline: RAGPipeline) -> None:
         st.session_state.admin_authenticated = False
         st.session_state.pop("admin_password_input", None)
         st.session_state.active_page = "CPF Bot"
-        st.experimental_rerun()
+        st.rerun()
     uploaded = st.file_uploader("Upload CPF FAQ (PDF/Markdown)", type=["pdf", "md", "txt"])
     if uploaded:
         save_path = _save_uploaded_file(uploaded)
