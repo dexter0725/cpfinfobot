@@ -11,7 +11,10 @@ try:
     from langchain_core.documents import Document  # langchain 0.2+
 except ImportError:  # pragma: no cover - fallback for older versions
     from langchain.docstore.document import Document
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+try:
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+except ImportError:  # pragma: no cover - fallback for langchain<0.2
+    from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from pypdf import PdfReader
 
