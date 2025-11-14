@@ -16,11 +16,15 @@ if __package__ in (None, ""):
     sys.path.append(str(PACKAGE_ROOT))
     import ingest  # type: ignore
     from rag import RAGPipeline  # type: ignore
-    from utils.security import check_password  # type: ignore
+    from utils.security import (
+        admin_password_configured,
+        check_password,
+        verify_admin_password,
+    )  # type: ignore
 else:
     from . import ingest
     from .rag import RAGPipeline
-    from .utils.security import check_password
+    from .utils.security import admin_password_configured, check_password, verify_admin_password
 
 ENV_PATH = PACKAGE_ROOT / ".env"
 ROOT_ENV_PATH = PROJECT_ROOT / ".env"
@@ -217,6 +221,24 @@ def _render_user_panel(pipeline: RAGPipeline) -> None:
 def _render_admin_panel(pipeline: RAGPipeline) -> None:
     st.subheader("Admin – Document Management")
     st.caption("Upload new CPF references or rebuild the knowledge base. Changes affect all users.")
+    if not admin_password_configured():
+        st.error("Admin password is not configured. Set `admin_password` in secrets or `CPF_ADMIN_PASSWORD`.")
+        return
+    if not st.session_state.get("admin_authenticated"):
+        st.info("Enter the admin password to manage documents.")
+        password = st.text_input("Admin password", type="password", key="admin_password_input")
+        if st.button("Unlock admin tools", key="unlock_admin"):
+            if verify_admin_password(password or ""):
+                st.session_state.admin_authenticated = True
+                st.success("Admin tools unlocked.")
+            else:
+                st.error("Incorrect admin password.")
+        return
+
+    if st.button("Log out", key="admin_logout"):
+        st.session_state.admin_authenticated = False
+        st.session_state.pop("admin_password_input", None)
+        st.stop()
     uploaded = st.file_uploader("Upload CPF FAQ (PDF/Markdown)", type=["pdf", "md", "txt"])
     if uploaded:
         save_path = _save_uploaded_file(uploaded)

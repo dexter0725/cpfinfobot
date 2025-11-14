@@ -8,10 +8,17 @@ from typing import Optional
 import streamlit as st
 
 
+def _get_secret(key: str, env_var: str) -> Optional[str]:
+    secret = st.secrets.get(key) if hasattr(st, "secrets") else None  # type: ignore[attr-defined]
+    return secret or os.getenv(env_var)
+
+
 def _get_password_secret() -> Optional[str]:
-    # Prefer Streamlit secrets; fall back to env var for local dev automation.
-    secret = st.secrets.get("password") if hasattr(st, "secrets") else None  # type: ignore[attr-defined]
-    return secret or os.getenv("CPF_APP_PASSWORD")
+    return _get_secret("password", "CPF_APP_PASSWORD")
+
+
+def _get_admin_secret() -> Optional[str]:
+    return _get_secret("admin_password", "CPF_ADMIN_PASSWORD")
 
 
 def check_password() -> bool:
@@ -39,4 +46,15 @@ def check_password() -> bool:
     return False
 
 
-__all__ = ["check_password"]
+def admin_password_configured() -> bool:
+    return _get_admin_secret() is not None
+
+
+def verify_admin_password(value: str) -> bool:
+    secret = _get_admin_secret()
+    if not secret:
+        return False
+    return hmac.compare_digest(value, secret)
+
+
+__all__ = ["check_password", "verify_admin_password", "admin_password_configured"]
