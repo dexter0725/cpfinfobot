@@ -151,17 +151,22 @@ def page_about() -> None:
 def page_methodology() -> None:
     st.header("Methodology")
     st.markdown(
-        """1. **Document ingestion** – Admins upload CPF FAQs, policy notes, or press releases.
-        The ingestion service chunks curated CPF FAQs, embeds the text with OpenAI embeddings, and
-        stores vectors in a Chroma index.
-        2. **Retrieval-Augmented Generation (RAG)** – When a user asks a question, the app
-        retrieves the most relevant chunks and feeds them to GPT-4o mini to craft a grounded
-        response that cites its sources.
-        3. **Verification workflow** – Users can paste claims verbatim. The bot explains if
-        the claim is supported, partially supported, or not supported and highlights the
-        matching CPF rules.
-        4. **Summaries and exports** – Users may request a high-level summary of the evidence
-        or download the full response for reference."""
+        """
+1. **Document ingestion** – Admins upload CPF FAQs, policy notes, or press releases.  
+   The ingestion service chunks curated CPF FAQs, embeds the text with OpenAI embeddings,  
+   and stores vectors in a Chroma index.  
+
+2. **Retrieval-Augmented Generation (RAG)** – When a user asks a question,  
+   the app retrieves the most relevant chunks and feeds them to GPT-4o mini  
+   to craft a grounded response that cites its sources.  
+
+3. **Verification workflow** – Users can paste claims verbatim.  
+   The bot explains if the claim is supported, partially supported,  
+   or not supported and highlights the matching CPF rules.  
+
+4. **Summaries and exports** – Users may request a high-level summary  
+   of the evidence or download the full response for reference. 
+"""
     )
     st.subheader("Why GenAI")
     st.write(
