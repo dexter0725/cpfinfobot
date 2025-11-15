@@ -165,7 +165,7 @@ def page_methodology() -> None:
    or not supported and highlights the matching CPF rules.  
 
 4. **Summaries and exports** – Users may request a high-level summary  
-   of the evidence or download the full response for reference.
+   of the evidence or download the full response for reference. 
 """
     )
     st.subheader("Why GenAI")
